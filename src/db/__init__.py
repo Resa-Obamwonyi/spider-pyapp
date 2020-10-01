@@ -57,7 +57,7 @@ class DB:
 
   @classmethod
   def seed(cls):
-    # Execute the seed SQL script
+    ''' Execute the seed SQL script '''
     cursor = cls.connect().cursor()
     cls.setup()
     try:
@@ -70,12 +70,12 @@ class DB:
 
   @classmethod
   def links(cls):
-    # Returns a reference to the links interface
+    ''' Returns a reference to the links interface'''
     return links.Links(cls.connect())
 
   @classmethod
   def pages(cls):
+    ''' Returns a reference to the pages interface'''
     cls.seed()
-    # Returns a reference to the pages interface
     return pages.Pages(cls.connect())
 

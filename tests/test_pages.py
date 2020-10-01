@@ -42,7 +42,7 @@ class TestDB(unittest.TestCase):
     ''' Test update is_scraping value by id '''
     DB.setup()
     DB.seed()
-    value = self.exec.update_by_id(1)
+    value = self.exec.update_by_id(False, 1)
     self.assertEqual(value, None)
 
   def test_delete_by_id(self):

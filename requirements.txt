@@ -20,6 +20,3 @@ soupsieve==2.0.1
 urllib3==1.25.10
 vine==5.0.0
 wcwidth==0.2.5
-pip~=20.2.2
-configparser~=5.0.0
-setuptools~=47.1.0

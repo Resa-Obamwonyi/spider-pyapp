@@ -1,38 +1,45 @@
 import requests
 from bs4 import BeautifulSoup
-from celery import Celery
-from decouple import config
-from src.db.pages import Pages
 from src.db import DB
 from src.db.links import Links
-from time import sleep
 
 
-app = Celery('spider', broker=config('CELERY_BROKER'))
+def spider(page_id):
 
+  ''' Takes a page id, selects the url linked to page id and runs the scraper
+      Scraper takes url and returns a list of urls scraped,
+      a maximum of 10 links are inserted into the database '''
 
-@app.task
-def spider(id_url):
+  if type(page_id) != int or page_id == 0:
+    raise ValueError('Page Id is not valid')
 
-  page_id = id_url[0]
-  url = id_url[1]
-  all_links = []
+  get_url = DB.pages().get_url(page_id)
 
-  res = requests.get(url)
-  soup = BeautifulSoup(res.text, 'html.parser')
+  if get_url is None:
+      return ValueError('Page Id not found')
 
-  for link in soup.find_all('a', href=True):
+  else:
+      url = get_url[0]
+      all_links = []
 
-    if link['href'].startswith('http'):
-      all_links.append(link['href'])
-  # check if page id is in links, delete all data with page id
-  # set is_scraping in pages table where id == page_id to True
-  # scrap
-  # insert into DB
-  sleep(3)
-  for link in all_links[:10]:
-    Links(DB().connect()).insert(page_id, link)
-  # set is_scraping in pages table where id == page_id to False
+      # set is_scraping to True where id == page_id
+      DB.pages().update_by_id(True, page_id)
 
+      res = requests.get(url)
+      soup = BeautifulSoup(res.text, 'html.parser')
 
-print(spider(Pages(DB.connect()).get_url(1)))
+      for link in soup.find_all('a', href=True):
+
+        if link['href'].startswith('http'):
+          all_links.append(link['href'])
+
+      # check if page id is in already in links table, delete all data with page id
+      DB.links().delete_by_page_id(page_id)
+
+      for link in all_links[:10]:
+        # Insert each link into the links table
+        Links(DB().connect()).insert(page_id, link)
+
+      # set is_scraping to False in  where id == page_id
+      DB.pages().update_by_id(False, page_id)
+

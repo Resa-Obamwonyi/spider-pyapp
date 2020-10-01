@@ -15,20 +15,12 @@ class Pages:
     return self.cursor.fetchone()
 
   def get_url(self, id):
-    self.cursor.execute('SELECT id, url FROM pages WHERE id = %s', (id,))
+    self.cursor.execute('SELECT url FROM pages WHERE id = %s', (id,))
     url = self.cursor.fetchone()
     return url
 
-  def update_by_id(self, id):
-    self.cursor.execute('SELECT is_scraping FROM pages WHERE id = %s', (id,))
-    value = self.cursor.fetchone()
-    is_scraping = value[0]
-
-    if is_scraping == True:
-      self.cursor.execute('UPDATE pages SET is_scraping = %s WHERE id = %s', (False, id))
-
-    if is_scraping == False:
-      self.cursor.execute('UPDATE pages SET is_scraping = %s WHERE id = %s', (True, id))
+  def update_by_id(self, value, id):
+      self.cursor.execute('UPDATE pages SET is_scraping = %s WHERE id = %s', (value, id))
 
   def delete_by_id(self, id):
     self.cursor.execute('DELETE FROM pages WHERE id = %s', (id,))
