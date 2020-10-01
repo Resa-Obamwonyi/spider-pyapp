@@ -1,0 +1,43 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python application
+
+on: [ push ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    services:
+        postgres:
+          image: postgres:12-alpine
+          # Provide the password for postgres
+          env:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: Euphoria
+            POSTGRES_DB: serenedb
+
+          ports:
+            - 5432:5432
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+ 
+    - name: Test with unittest
+      run: |
+        python -m unittest
+      env:
+        DB_HOST:  localhost
+        DB_PORT:  5432
+        DB_NAME:  serenedb
+        DB_PASSWORD:  Euphoria
+        DB_USER:  postgres
